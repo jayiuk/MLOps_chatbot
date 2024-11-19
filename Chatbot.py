@@ -1,4 +1,4 @@
-from Retriever import retriever
+from retriever import Retriever
 import VectorStore
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
@@ -9,7 +9,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_huggingface.llms import HuggingFacePipeline
 
 
-class chatbot_chain():
+class ChatbotChain():
     def __init__(self, model, tokenizer, user_id = None, db_connection = None, *args, **kwargs):
         self.model = model
         self.tokenizer = tokenizer
@@ -22,7 +22,7 @@ class chatbot_chain():
                                         ])
 
     
-    def get_llmchain(self):
+    def _get_llmchain(self):
         tokenizer = self.tokenizer
         pad_token = tokenizer.convert_tokens_to_ids("<|end_of_text|>")
         eos_token = tokenizer.convert_tokens_to_ids("<eot_id>")
@@ -32,10 +32,10 @@ class chatbot_chain():
         llm_chain = prompt | llm
         return llm_chain
     
-    def get_chain_with_rag(self, dir_path, collection, k):
-        vec_db = VectorStore.load_vectorstore(dir_path, collection)
-        chain_retriever = retriever(vec_db, searched = k).get_retriever()
-        llm_chain = self.get_llmchain()
+    def get_chain_with_rag(self, dir_path, collection, embedding, k):
+        vec_db = VectorStore.load_vectorstore(dir_path, collection, embedding)
+        chain_retriever = Retriever(vec_db, searched = k).get_retriever()
+        llm_chain = self._get_llmchain()
         rag_context = {"question" : RunnablePassthrough(), "retriever" : chain_retriever}
         rag_chain = rag_context | llm_chain
         return rag_chain

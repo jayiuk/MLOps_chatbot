@@ -23,3 +23,7 @@ def docload(file_path):
     loader = PDFMinerLoader(file_path, concatenate_pages=False)
     pages = loader.load()
     return pages
+
+# @split
+# def webloader(url):
+#     pass
